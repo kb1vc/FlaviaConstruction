@@ -42,10 +42,10 @@ module BarrelN(n, sc)
     cylinder(d = 2.0 * BarrelRad, h = BarrelHeight);
     for(ang = [0:pitch:360])
       rotate([0, 0, ang]) {
-        RadialTab(sc);
-        translate([0, 2.5 * InnerWidth, BarrelHeight]) rotate([90, 0, 0]) scale([sc, sc, 5]) TabNTail();
-        rotate([0, 180,0])    translate([0, 2.5 * InnerWidth, -0.01]) rotate([90, 0, 0]) scale([sc, sc, 5]) TabNTail();
+        scale([1,1,1.5]) RadialTab(sc);
       }
+   translate([0, 2.5 * InnerWidth, BarrelHeight]) rotate([90, 0, 0]) scale([sc, sc, 5]) TabNTail();      
+   rotate([0, 180,0])    translate([0, 2.5 * InnerWidth, -0.01]) rotate([90, 0, 0]) scale([sc, sc, 5]) TabNTail();            
   }
 }
 
