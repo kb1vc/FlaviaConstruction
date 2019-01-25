@@ -1,8 +1,15 @@
 include <FlaviaPrims.scad>
 
-XPitch = (TabLength * 1.5);
-YPitch = TabLength * 1.2;
+BumpOffset = TabLength - 0.425;
+BumpDia = 0.18;
+
 TailLength = InnerThickness * 1.5;
+
+module BumpPlate() {
+  cube([TabLength, InnerWidth, InnerThickness], false);
+  translate([BumpOffset, InnerWidth * 0.5, InnerThickness]) sphere(d=BumpDia);
+}
+
 module DoveTail() {
   linear_extrude(height = InnerWidth)
     polygon(points = [ [-InnerThickness, 0], [InnerThickness, 0],
@@ -11,7 +18,7 @@ module DoveTail() {
 
 module TabNTail() {
   translate([0, -TailLength, 0]) DoveTail();
-  translate([-InnerThickness * 0.5, -0.010, 0]) rotate([90, 0, 90]) InnerPlate();
+  translate([-InnerThickness * 0.5, -0.010, 0]) rotate([90, 0, 90]) BumpPlate();
 }
 
 
