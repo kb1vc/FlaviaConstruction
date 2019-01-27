@@ -11,7 +11,7 @@ JoinerWidth = SlotWidth * 1.5;
 
 DoveTailSlotMul = 1.10;
 
-BumpDia = 0.1;
+BumpDia = 0.2;
 BumpOffset = TabLength - 0.22; 
 
 module GussetHub() {
