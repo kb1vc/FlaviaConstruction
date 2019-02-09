@@ -33,7 +33,7 @@ TPlateThickness = 0.090;
 TTrapezoidBase = 0.55;
 TTrapezoidTop = 0.21;
 TTrapezoidHeight = 0.18; // lots of room -- good choice for 0.2mm resolution in Z..
-SlugLength = 0.625;
+SlugLength = 1.25; // was 0.625;
 echo(TTrapezoidHeight=TTrapezoidHeight, TSlotDepth = TSlotDepth, TPlateThickness = TPlateThickness);
 
 ScrewHeadDia = 0.270; // a little oversized for a #6
@@ -49,11 +49,24 @@ module HexNut() {
     }
 }
 
+module ReliefRing(dia)
+{
+  translate([0,0,-0.001]) difference() {
+    cylinder(d = dia *10, h = 0.05);
+    translate([0,0,-0.001]) cylinder(d = dia - 0.05, h = 2);
+  }
+}
 module DummyDisk()
 {
   difference() {
-    cylinder(d = InnerWidth, h = InnerThickness * 2);
-    translate([0, 0, -0.001]) cylinder(d = CenterHoleDia, h = InnerThickness * 2.2);    
+    cylinder(d = InnerWidth, h = InnerThickness * 3); // used on the edges, gets a little space for the screw to seat.
+    union() {
+      translate([0, 0, -0.001]) {
+        cylinder(d = CenterHoleDia, h = InnerThickness * 5);
+	translate([0,0,InnerThickness + 0.05]) scale([1,1,2]) HexNut();
+      }
+      ReliefRing(InnerWidth);
+    }
   }
 }
 
@@ -82,7 +95,7 @@ module TSlotSlugBody()
 {
   translate([0, 0, TrapOffset]) 
   // rescale
-    translate([-0.5 * SlugLength, 0, TTrapezoidHeight])    rotate([0, 90, 0])    
+    translate([-0.5 * SlugLength, 0, TTrapezoidHeight])    rotate([0, 90, 0])
     // extrude
     linear_extrude(height = SlugLength) {
       // build the trapezoid
@@ -96,8 +109,7 @@ module TSlotSlugBody()
 
 module TSlotSlug()
 { 
-  difference() {
-    TSlotSlugBody();
+  difference() {    TSlotSlugBody();
     union() {
       translate([0, 0, TrapOffset + 0.05]) scale([1,1,10]) HexNut();
       translate([0,0,-0.001]) cylinder(d = CenterHoleDia, h = 2);
@@ -105,8 +117,57 @@ module TSlotSlug()
   }
 }
 
+module BSlotSlugBody()
+{
+  translate([0, 0, TrapOffset]) {
+    // rescale
+    translate([-0.5 * SlugLength, 0, TTrapezoidHeight])    rotate([0, 90, 0]) {
+      // extrude
+        linear_extrude(height = SlugLength) {
+        // build the trapezoid
+        polygon(points = [[TTrapezoidHeight, -0.5 * TTrapezoidBase], [TTrapezoidHeight, 0.5 * TTrapezoidBase],
+                        [0, 0.5 * TTrapezoidTop], [0, -0.5 * TTrapezoidTop]]);
+
+      }
+    }
+  }
+
+  translate([0, 0, 2.4 * InnerThickness]) rotate([0, 90, 0]) cube([2.5 * TPlateThickness , 0.95 * TSlotCutWidth , SlugLength ], true);  
+  translate([0,0,CDMountThickness]) rotate([0, 180, 0]) CDPlate();
+}
+
+module RoundOff()
+{
+  RHeight=10*TTrapezoidHeight; 
+  union() {
+    translate([-0.5 * InnerWidth, 0, -0.5 * RHeight]) cylinder(d = InnerWidth, h = RHeight);
+    translate([0.5*InnerWidth, 0, -0.5 * RHeight]) cylinder(d = InnerWidth, h = RHeight);
+    translate([-0.5 *InnerWidth, -1 *InnerWidth, 0]) cube([InnerWidth, 2 * InnerWidth, RHeight]);
+  }
+}
+
+module BSlotSlug()
+{ 
+  difference() {
+    intersection() { 
+      BSlotSlugBody();
+      RoundOff();
+    }
+    union() {
+      translate([0, 0, TrapOffset + 0.05]) scale([1,1,10]) HexNut();
+      translate([0,0,-0.001]) cylinder(d = CenterHoleDia, h = 2);
+    }
+  }
+}
+
+
 module RoundedBumpPlate() {
-  translate([0,0.5*InnerWidth, 0]) cylinder(d=InnerWidth, h=InnerThickness);
+  translate([0,0.5*InnerWidth, 0]) {
+    difference() {
+      cylinder(d=InnerWidth, h=InnerThickness);
+      ReliefRing(InnerWidth);
+    }
+  }
   cube([TabLength, InnerWidth, InnerThickness], false);
   intersection() {
     translate([BumpOffset, InnerWidth * 0.5, 0.75 * InnerThickness]) sphere(d=BumpDia);
@@ -129,32 +190,33 @@ module Knob()
 {
   difference() {
     union() {
-      knurl(k_cyl_hg = InnerThickness, k_cyl_od = 1.25 * CDHoleDia, 
+      knurl(k_cyl_hg = InnerThickness * 2, k_cyl_od = 1.25 * CDHoleDia, 
             knurl_wd = 0.08, knurl_hg = 0.08, knurl_dp = 0.02, 
             e_smooth = 0.02, s_smooth = 0);
-      translate([0,0,InnerThickness - 0.01]) cylinder(d = CDHoleDia, h = InnerThickness);
+      translate([0,0,InnerThickness * 2 - 0.01]) cylinder(d = CDHoleDia, h = InnerThickness);
     }
     union() {
-      translate([0,0,-0.01]) cylinder(d = ScrewHeadDia, h = InnerThickness);
-      cylinder(d = CenterHoleDia, h = 2);            
+      translate([0,0,-0.01]) cylinder(d = ScrewHeadDia, h = InnerThickness * 2);
+      cylinder(d = CenterHoleDia, h = 2);
+      ReliefRing(1.26*CDHoleDia);
     }
   }
 }
 
 module EdgeTabSet() {
-  XOffset = 0.75;
+  XOffset = 1.0;
   YOffset = 0.0;
   YStep = 0.75;
   XStep = 1.35;
   for(y = [0 : 1 : 1]) {
     translate([XOffset, YOffset + YStep * y, 0]) PlateWithSpacer();
-    translate([XOffset + XStep, YOffset + YStep * y, 0]) DummyDisk();
   }
+  translate([XOffset + XStep, YOffset, 0]) DummyDisk();
 
   Y2Step = 1.33 * CDHoleDia ;
   for(y = [0 : 1 : 0]) {
     translate([0, Y2Step * (2 * y + 1), 0]) Knob();
-    translate([0, Y2Step * 2* y, 0]) TSlotSlug();
+    translate([0, Y2Step * 2* y, 0]) BSlotSlug();
   }
 }
 
@@ -170,14 +232,22 @@ module InteriorTabSet() {
 
   Y2Step = 1.33 * CDHoleDia ;
   for(y = [0 : 1 : 0]) {
-    translate([0, Y2Step * y, 0]) CDMount();
+    translate([0, Y2Step * y, 0]) {
+      difference() {
+        CDMount();
+	ReliefRing(1.25*CDHoleDia);
+      }
+    }
   }
+
+  translate([0, Y2Step, 0]) Knob();
 }
 
 scale([25.4,25.4,25.4])
 {
  // CDMount();
- // TSlotSlug();
+ // BSlotSlug();
  EdgeTabSet();
+ //DummyDisk();
  //InteriorTabSet(); 
 }

@@ -202,20 +202,21 @@ module JustTabs()
   y_pitch = ForkThickness * 1.5;
   y_offset = y_pitch * 0.5;
   x_offset = x_pitch * -0.55;
-  for(x = [0:1:3])
-    for(y = [0:1:9]) {
+  for(x = [0:1:5])
+    for(y = [0:1:15]) {
       nx = x * x_pitch + x_start + ((x % 2) * x_offset);;
       ny = y * y_pitch + y_start + ((x % 2) * y_offset);
       translate([nx, ny, 0]) RoundedBallTab(-0.1);
     }
-
+  if(0) {
   for(x = [0:1:3])
     for(y = [0:1:1])
       translate([3.2 * TabLength + x * y_pitch * 0.5,
                  y*TabLength*1.4 + ((x%2) * y_offset * 1.6), 0]) rotate([0,0,90]) RoundedBallTab(-0.1);
+  }
 }
 
-if(0) {
+if(1) {
 scale([25.4,25.4,25.4]) {
 //  VertexSet_3(); 
 //  VertexSet_4(); 
@@ -224,7 +225,7 @@ scale([25.4,25.4,25.4]) {
   // Hub_3(SlotSplit);
 //  Socket(1.35);
 //  translate([0, 0.4, 0]) Socket(1.30);  
-  //RoundedBallTab(-0.1);
+//  RoundedBallTab(-0.1);
   JustTabs();
 }
 }
