@@ -33,7 +33,7 @@ TPlateThickness = 0.090;
 TTrapezoidBase = 0.55;
 TTrapezoidTop = 0.21;
 TTrapezoidHeight = 0.18; // lots of room -- good choice for 0.2mm resolution in Z..
-SlugLength = 1.25; // was 0.625;
+SlugLength = 1.75; // was 0.625;
 echo(TTrapezoidHeight=TTrapezoidHeight, TSlotDepth = TSlotDepth, TPlateThickness = TPlateThickness);
 
 ScrewHeadDia = 0.270; // a little oversized for a #6
@@ -138,12 +138,17 @@ module BSlotSlugBody()
 
 module RoundOff()
 {
-  RHeight=10*TTrapezoidHeight; 
-  union() {
-    translate([-0.5 * InnerWidth, 0, -0.5 * RHeight]) cylinder(d = InnerWidth, h = RHeight);
-    translate([0.5*InnerWidth, 0, -0.5 * RHeight]) cylinder(d = InnerWidth, h = RHeight);
-    translate([-0.5 *InnerWidth, -1 *InnerWidth, 0]) cube([InnerWidth, 2 * InnerWidth, RHeight]);
+  RHeight=10*TTrapezoidHeight;
+  intersection() {
+    union() {
+      translate([-0.5 * (SlugLength), 0, -0.5 * RHeight]) cylinder(d = InnerWidth, h = RHeight);
+      translate([0.5*(SlugLength), 0, -0.5 * RHeight]) cylinder(d = InnerWidth, h = RHeight);
+      translate([-0.5 * SlugLength, -1 *InnerWidth, 0]) cube([SlugLength, 2 * InnerWidth, RHeight]);      
+    }
+
+    translate([0,0.5 * RHeight, -InnerWidth]) rotate([90,0,0]) cylinder(d = 4*InnerWidth, h = RHeight);
   }
+
 }
 
 module BSlotSlug()
@@ -246,8 +251,9 @@ module InteriorTabSet() {
 scale([25.4,25.4,25.4])
 {
  // CDMount();
- // BSlotSlug();
- EdgeTabSet();
+ BSlotSlug();
+ //color("red") RoundOff();
+ //EdgeTabSet();
  //DummyDisk();
  //InteriorTabSet(); 
 }
